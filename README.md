@@ -195,6 +195,29 @@ mongo mongodb://mark:5AYRft73VtFpc84k@localhost:27017/myplace
 
 ```
 
+Para enumerar la base de datos mongo es un poco diferente.En MongoDB, en lugar de "tablas", se utilizan "colecciones". 
+
+
+```
+use myplace
+show dbs
+show collections
+db.users.find()
+
+```
+
+## PSPY
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/d5b82dc6-da41-4ceb-b14b-2e2832c9cf93)
+
+Nos damos cuenta y tambien con el linpeas.sh que este usuario no puede hacer nada. Despues que se ejecutan 2 diferentes app.js
+
+```
+/usr/bin/node /var/www/myplace/app.js
+/usr/bin/node /var/scheduler/app.js
+
+```
+
 
 
 

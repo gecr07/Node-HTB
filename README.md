@@ -261,6 +261,26 @@ export TERM=xtem
 export SHELL=/bin/bash
 ```
 
+> adm means that I can access all the logs, and that’s worth checking out, but admin is more interesting. It’s group id (gid) is above 1000, which means it’s a group created by an admin instead of by the OS, which means it’s custom. Looking for files with this group, there’s only one.
+
+
+```
+find / -type f -perm -4000 -user root 2>/dev/null
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/4c0e57f1-69cb-4139-8bc5-d34c0a70eac0)
+
+
+Mismo archivo que ya sabiamos que era SUID con el linpeas.
+
+> Interestingly, this binary is called from /var/www/myplace/app.js
+
+
+## Dynamic analysis
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/1ae3c311-5f20-4903-9e42-bb229c3c0ffd)
+
+Intentamos ver ese archivo que hace nos lo topamos en app.js el normal no el schedule. Tiene 3 archivos y al parecer genera  backups.
 
 
 

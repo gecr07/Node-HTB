@@ -165,7 +165,19 @@ sshpass -p 'passowrd' ssh tom@10.10.10.58 # esto sirve para poder automatizar al
 No en todos los sistemas tienen netstat pero tal parece que si ss
 
 ```
-ss 
+ss -ant
+-a (de all)  Display both listening and non-listening (for TCP this means established connections) sockets
+-n Do not try to resolve service names.
+-t Display TCP sockets.
+
+## Shortcut
+
+shift / para buscar
+N para atras
+n para adelante
+g volver a incio
+h help 
+
 ```
 
 

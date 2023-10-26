@@ -159,7 +159,30 @@ Ya te digo que ninguna credencial de las anteriores servis para inciar session c
 ```
 sshpass -p 'passowrd' ssh tom@10.10.10.58 # esto sirve para poder automatizar algun script y probar passwords
 ```
-A
+
+## ss vs netstat
+
+No en todos los sistemas tienen netstat pero tal parece que si ss
+
+```
+ss 
+```
+
+
+## MONGODB
+
+Para poder conectase a esta base de datos se hace asi:
+
+```
+ const url= 'mongodb://mark:5AYRft73VtFpc84k@localhost:27017/myplace?authMechanism=DEFAULT&authSource=myplace';
+  12   │ const backup_key  = '45fac180e9eee72f4fd2d9386ea7033e52b7c740afc3d98a8d0230167104d474';
+
+## Conectarse
+
+mongo mongodb://mark:5AYRft73VtFpc84k@localhost:27017/myplace
+
+```
+
 
 
 

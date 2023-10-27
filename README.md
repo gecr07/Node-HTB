@@ -332,6 +332,55 @@ int main() {
 ```
 
 
+### strcmp
+
+strcmp: Función que sirve para comparar dos cadenas de caracteres, si las cadenas son iguales te devolverá un “0”, si la primer cadena es menor que la segunda devolverá un número negativo (en este ejemplo "-1") y finalmente si la primer cadena es mayor que la segunda devolverá un numero positivo("1"). La sintaxis para utilizar la función es la siguiente:
+
+```C
+
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    const char *cadena1 = "manzana";
+    const char *cadena2 = "naranja";
+
+    int resultado = strcmp(cadena1, cadena2);
+
+    if (resultado == 0) {
+        printf("Las cadenas son iguales.\n");
+    } else if (resultado < 0) {
+        printf("La cadena1 es menor que la cadena2.\n");
+    } else {
+        printf("La cadena1 es mayor que la cadena2.\n");
+    }
+
+    return 0;
+}
+
+```
+Yo no lo sabia pero strcmp puede comparar cadenas por su posicion alfabeticamente.Compara dos cadenas A y B y devuelve:
+
+-1: Si alfabéticamente A es menor que B
+
+0 : Si son iguales
+
+1 : Si alfabéticamente B es menos que A
+
+
+
+
+### strcspn
+
+La función strcspn en C se utiliza para calcular la longitud de la subcadena inicial de una cadena que no contiene ninguno de los caracteres especificados en un conjunto de caracteres dado. La firma de la función strcspn es la siguiente ( EN ESTE CASO LO QUE VEO ES QUE EL CARACTER QUE BUSCA ES EL \n).
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/d044c8be-e6f6-4b22-b672-92adfb0dd218)
+
+Entonces si saca el valor de ese string sin el salto de linea y posteriormente lo compara con nuestra a que meticmos
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/1ba60a99-e23e-46a1-a4c3-8e9487b18d46)
+
+
 
 
 

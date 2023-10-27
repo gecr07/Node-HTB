@@ -288,10 +288,48 @@ ltrace a b c
 ```
 
 
+## ltrace vs strace
+
+En resumen, ltrace se centra en el seguimiento de llamadas a funciones en bibliotecas compartidas(en windows serian las DLL) mientras que strace se enfoca en el seguimiento de llamadas al sistema realizadas por un programa(en Windows serian las APIs). Ambas herramientas son útiles en diferentes contextos de depuración y pueden proporcionar información valiosa para resolver problemas de programación y rendimiento.
+
+Entonces ya identificamos que backup es una via potencial de ingreso ahora supongamos que no vimos el archivo app.js para saber como funciona esto entonces vamos a usar ltrace.
 
 
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/ea99fd50-f202-4e4e-8f70-07031af2286a)
 
+Ahora vamos a ver con ltrace que hace. aqui no tenia ni -h ni --help nada. 
 
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/b4aea48f-201a-490f-becf-27f3f6372e19)
+
+Lo primero que esta haciendo es comparar la a con la -q como pusimos una a entonces = 1 falla la comparacion.
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/a08d989e-eab3-475b-aeb6-2ba85c542050)
+
+Como ahi si le pusimos la -q no muestra nada nos hace pensar en (-q de quiet). Si nos damos cuenta esta concatenando una cadena y despues esa cadena abre ese archivo (fopen("/etc/myplace/keys", "r")). Nos vamos a ver que tiene eso.
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/0a63d063-9ea6-494b-863e-15f06ff2b2c3)
+
+### fgets
+
+La función fgets es una función en el lenguaje de programación C que se utiliza para leer una línea de texto desde un archivo o desde la entrada estándar y almacenarla en un búfer (un arreglo de caracteres). La función fgets se utiliza comúnmente para leer líneas de texto completas, incluyendo el carácter de nueva línea ('\n') que indica el final de la línea.
+
+```C 
+#include <stdio.h>
+
+int main() {
+    char buffer[100];
+    
+    printf("Escribe una línea de texto: ");
+    
+    if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+        printf("Línea leída: %s", buffer);
+    } else {
+        printf("Error al leer la línea.");
+    }
+    
+    return 0;
+}
+```
 
 
 

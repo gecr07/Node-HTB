@@ -282,7 +282,10 @@ Mismo archivo que ya sabiamos que era SUID con el linpeas.
 
 Intentamos ver ese archivo que hace nos lo topamos en app.js el normal no el schedule. Tiene 3 archivos y al parecer genera  backups.
 
+```
+ltrace a b c
 
+```
 
 
 

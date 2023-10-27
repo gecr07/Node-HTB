@@ -381,21 +381,76 @@ Entonces si saca el valor de ese string sin el salto de linea y posteriormente l
 ![image](https://github.com/gecr07/Node-HTB/assets/63270579/1ba60a99-e23e-46a1-a4c3-8e9487b18d46)
 
 
+Si nos damos cuenta solo esta comparando ese campo ( el segundo)
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/337edba2-11fe-4103-b5ef-8bdd8b768c81)
+
+Ahora si ponemos uno de esos strings salen mas cosas:
+
+### strstr
+
+La función strstr en C se utiliza para buscar la primera aparición de una subcadena (substring) en una cadena más larga. La firma de la función strstr es la siguiente:
+
+```C
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    const char *cadena = "Hola, mundo. ¡Hola a todos!";
+    const char *subcadena = "a a";
+
+    char *resultado = strstr(cadena, subcadena);
+
+        printf("Inicio del programa \n");
+
+    if (resultado != NULL) {
+        printf("Dentro del if\n");
+        printf("Subcadena encontrada: %s\n", resultado);
+        printf("\n");
+    } else {
+        printf("Dentro del else\n");
+        printf("Subcadena no encontrada.\n");
+        printf("\n");
+        }
+
+    return 0;
+}
+
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/a93b0f6e-f6d7-40d9-9522-63d57cc64c9b)
 
 
+La función strstr busca la primera ocurrencia de la subcadena en la cadena y devuelve un puntero al comienzo de la primera coincidencia, o devuelve un puntero nulo (NULL) si la subcadena no se encuentra en la cadena.
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/8419e99e-5e38-4370-8f01-b4859f0ae1ab)
+
+Por eso devuelve null porque no encuentra ninguna subcadena que comience con esos caracteres.
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/c28bdfd1-30d7-4e6c-8553-6defe0b14032)
+
+Entonces en app.js nos damos cuenta como funciona. Si metes root compara y detecta y mete directamente la troll face
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/f35faa68-351a-4c94-b8fa-22da1822811b)
 
 
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/602b7059-18da-408e-992e-2d5828035718)
+
+Entonces mira cuando compara con /root lo que pasa
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/0f56f623-acc6-4f1b-98e0-38b4a27d41f0)
+
+Y nos mete la troll face. Una manera de que S4vitar vencio esto es ponerse en el directorio / entonces asi solo llamar con el tercer parametro asi:
 
 
+```bash
+
+ backup -q a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 root
 
 
+```
 
-
-
-
-
-
-
+Y asi vence las validaciones que se hacen antes.
 
 
 

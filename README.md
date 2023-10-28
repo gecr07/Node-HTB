@@ -540,6 +540,9 @@ Es una técnica de protección que hace que las tablas de reubicación sean de s
 
 ![image](https://github.com/gecr07/Node-HTB/assets/63270579/00f57e9e-4b2e-4079-8e29-50b7ff686a11)
 
+## ASLR 
+
+En resumen, ASLR es una técnica que aleatoriza la ubicación de bibliotecas y otros segmentos de memoria en tiempo de ejecución a nivel del sistema operativo, mientras que PIE es una característica de los programas ejecutables que los hace independientes de la dirección, permitiendo que se carguen en diferentes ubicaciones de memoria. Ambas técnicas contribuyen a la seguridad de un sistema, pero PIE es una característica específica de los programas, mientras que ASLR es una defensa a nivel del sistema.
 
 ## El ataque "ret2libc"
 
@@ -563,19 +566,93 @@ El comando ldd (abreviatura de "list dynamic dependencies") es una herramienta u
 ![image](https://github.com/gecr07/Node-HTB/assets/63270579/75c1ec0d-4083-4b24-8ffe-b47bc97109b8)
 
 
-Entonces lo que vamos a hacer es algo como eso de arriba pero con la libreria de libc.
+Entonces lo que vamos a hacer es algo como eso de arriba pero con la libreria de libc. Para saber si el ASL esta activado usa:
+
+```
+cat /proc/sys/kernel/randomize_va_space
+2
+
+for i in $(seq 1 10); do which backup | xargs ldd | grep libc | awk 'NF{print $NF}' | tr -d "()" ;done
+
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/774d6068-60e3-46ff-ab18-92d755ad6ca3)
 
 
+Como las direcciones de 32 bits son pequeñas alguna veces hay coliciones o se repiten.
+
+```
+for i in $(seq 1 10000); do which backup | xargs ldd | grep libc | awk 'NF{print $NF}' | tr -d "()" ;done | grep "0xf75d4000"
+
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/4138f1c1-5ab1-4068-a017-15e4b2e8594c)
+
+Esto lo que nos permite es burlar el ASL. Mas o menos el flujo de ataque es asi Ret2libc -Z system_addr_off + exit_addr_off + bin_sh_addr
+
+```
+Vamos a jugar con el gef
+
+gef> i r # info registers
+
+# Para crear patrones y sacar los numeros exactos de donde se escribe el EIP
+
+gef> pattern create 1000
 
 
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/8613f8ff-7b52-4b1e-b973-414909867af0)
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/bb49c00e-eb5f-4b82-a246-32b128e97ac6)
+
+Ahora vamos a sacar el desplazamiento (offset) que tiene ese pattron el cual sobre escribe el EIP.
+
+```
+gef> pattern offset $eip
+
+```
+
+Tenemos que escribir 512 AAA (u otro caracter para sobre escribir el EIP)
 
 
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/0b3455a0-ee17-4cad-8b9f-1539ecbcef94)
 
 
+```
+gef➤  r adsf a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 $(python -c 'print("A"*512 + "MASA")')
 
+```
 
+### Littel Endial(alrrevez de como escribes) vs Big Endial (normal)
 
+#### Byte menos significativo (LSB):
+Supongamos que tenemos un byte de 8 bits con los siguientes valores binarios:
 
+LSB (Byte menos significativo) = 01011011
+
+En este caso, el bit en la extrema derecha (1) es el bit menos significativo porque tiene el menor peso en la representación del número. Este bit es el que contribuye menos al valor total del byte.
+
+#### Byte más significativo (MSB):
+Ahora, supongamos que tenemos otro byte de 8 bits con los siguientes valores binarios:
+
+MSB (Byte más significativo) = 10010110
+
+El bit en la extrema izquierda (1) es el bit más significativo porque tiene el mayor peso en la representación del número. Este bit es el que contribuye más al valor total del byte.
+
+En sistemas Linux de 32 bits (x86), las direcciones de memoria se representan en el formato "little-endian". Esto significa que los bytes menos significativos se almacenan en las direcciones de memoria más bajas, mientras que los bytes más significativos se almacenan en las direcciones de memoria más altas.
+
+Para entender mejor cómo se representan las direcciones en "little-endian" en un sistema de 32 bits, consideremos un ejemplo:
+
+Supongamos que tenemos una dirección de memoria de 32 bits en hexadecimal, como "0x12345678". En "little-endian", se almacenaría de la siguiente manera:
+
+Byte más bajo (menos significativo) en la dirección más baja: 0x78
+
+Siguiente byte: 0x56
+
+Siguiente byte: 0x34
+
+Byte más alto (más significativo) en la dirección más alta: 0x12
 
 
 

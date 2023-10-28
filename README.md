@@ -445,7 +445,8 @@ Y nos mete la troll face. Una manera de que S4vitar vencio esto es ponerse en el
 
 ```bash
 
- backup -q a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 root
+tom@node:/$ backup -q a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 root
+
 
 
 ```
@@ -453,6 +454,116 @@ Y nos mete la troll face. Una manera de que S4vitar vencio esto es ponerse en el
 Y asi vence las validaciones que se hacen antes.
 
 
+## Buffer overflow
+
+Este es la manera dificil y se emplean funciones que son vulnerables a este ataque. el primer campo sol compara el segundo igual pero al parecer el tecero si podria ser suseptible(yo digo que la vulnerabilidad esta en el strcy por eso los primeros 2 argumetnos no son vulnetables)
+
+
+```
+ ltrace backup -q a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 $(python -c 'print("A"*5000)')
+
+```
+
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/bc78bd67-af47-4c88-87ec-66d4a2255273)
+
+
+Entonces ahi se ve si es vulnerable y por el echo que strcpy ya sabes que lo lo es y no se ve que exista una sanitizacion.
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/deee50a2-46f2-4e90-8216-1f2601d8792d)
+
+
+
+
+### GDB
+
+GNU Debugger) es una poderosa herramienta de depuración que se utiliza en sistemas basados en Linux y en otros sistemas Unix. Su función principal es permitir a los desarrolladores inspeccionar y depurar programas escritos en lenguaje C, C++, y otros lenguajes que sean compatibles con GDB
+
+S4vitar nos recomienda instalar como una modificacion a este programa GEF
+
+> https://github.com/hugsy/gef
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/4341c149-63f7-4a2d-9570-6b30900fc3f1)
+
+```
+
+gdb ./backup -q
+
+### Para correrte el programa
+
+gef> r a b c
+
+gef> r -q a01a6aa5aaf1d7729f35c8278daae30f8a988257144c003f8b12c5aec39bc508 $(python -c 'print("A"*5000)')
+
+```
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/1d55a547-1845-49b1-a661-0e047e5cf300)
+
+Si le quitas el -q y le pones cualquier cosa ahi se ve el registro EIP con AAAA
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/e7c39add-c43c-494b-bb79-beaa651332b3)
+
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/e7d89d51-f0fa-4966-b6bb-e76cc734a8c6)
+
+
+Vamos a revisar que protecciones tiene el binario 
+
+```
+gef> checksec
+
+```
+
+> El resultado de un análisis de seguridad (checksec) en un binario proporciona información sobre las características de seguridad habilitadas o deshabilitadas en ese binario. Aquí está el significado de cada uno de los resultados que has obtenido:
+
+### Canary 
+
+ El "canary" (también conocido como "canary value" o "stack canary") es una técnica de seguridad utilizada para proteger contra desbordamientos de búfer y ataques de desbordamiento de pila. Un "canary" es un valor colocado en la pila antes del retorno de una función y se verifica antes de que la función salga para asegurarse de que no ha sido modificado. Si el "canary" se modifica, se trata de un signo de un posible desbordamiento de búfer. En este caso, el binario no tiene la protección de "canary" habilitada (✘), lo que significa que no se utiliza esta técnica de seguridad.
+
+
+ ### NX o DEP (Data Execution Prevention)
+
+Es una característica de seguridad que evita que las áreas de memoria marcadas como no ejecutables sean ejecutadas. Esta característica ayuda a prevenir la ejecución de código malicioso ubicado en áreas de memoria que no deberían contener código ejecutable.
+
+
+### PIE (✘): "PIE" significa "Position Independent Executable 
+
+Se refiere a la capacidad de un binario de ejecutarse en ubicaciones de memoria aleatorias. Los binarios con soporte "PIE" son más resistentes a ataques de explotación que se basan en conocer la ubicación exacta de funciones o datos en memoria. En este caso, el binario no es un "ejecutable independiente de la posición" (✘), lo que significa que su carga en memoria es predecible.
+
+## Fortify 
+
+La protección "Fortify" es una característica que ayuda a prevenir desbordamientos de búfer y otros errores comunes de programación al proporcionar funciones seguras en lugar de las funciones tradicionales que pueden ser vulnerables. La ausencia de "Fortify" (✘) significa que el binario no utiliza estas funciones seguras.
+
+## RelRO (Partial): La "RelRO" (Relocation Read-Only)
+
+Es una técnica de protección que hace que las tablas de reubicación sean de solo lectura después de que el binario se haya cargado en memoria. Esto dificulta la explotación de ciertos tipos de vulnerabilidades. La protección "Partial" indica que parte del binario tiene "RelRO" habilitado, pero no toda la imagen del programa.
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/00f57e9e-4b2e-4079-8e29-50b7ff686a11)
+
+
+## El ataque "ret2libc"
+
+
+La "libc" (abreviatura de "C Library" o "Biblioteca C" en español) es una biblioteca estándar de programación en el lenguaje de programación C y sus derivados, como C++ y otros. Esta biblioteca proporciona una colección de funciones y rutinas que los programadores utilizan comúnmente en sus programas para realizar tareas básicas, como entrada/salida, manipulación de cadenas, gestión de memoria, operaciones matemáticas, y más.
+
+La libc es una parte fundamental del sistema operativo y se encarga de proporcionar una interfaz consistente y portátil entre las aplicaciones y el sistema operativo subyacente. Contiene funciones que son esenciales para el funcionamiento de los programas y se utilizan ampliamente en todo tipo de software.
+
+El ataque "ret2libc" (retorno a la biblioteca estándar en inglés, "return-to-libc") es una técnica de explotación utilizada en la seguridad informática para aprovechar vulnerabilidades de desbordamiento de búfer en programas. Este ataque es una variante del clásico ataque de desbordamiento de búfer que se utiliza cuando el sistema operativo y las aplicaciones están protegidas contra la ejecución de código malicioso en la pila (DEP/NX) o la pila aleatoria (ASLR). Por lo tanto, en lugar de inyectar y ejecutar directamente código malicioso, los atacantes aprovechan las bibliotecas del sistema ya cargadas en memoria.
+
+
+Sí, la "libc" o "Biblioteca C" es una biblioteca dinámica en la mayoría de los sistemas operativos basados en Unix, como Linux. La libc es una biblioteca estándar que proporciona funciones esenciales para la programación en el lenguaje de programación C. Estas funciones incluyen operaciones de entrada/salida, manipulación de cadenas, gestión de memoria, operaciones matemáticas y muchas otras funciones comunes.
+
+### ldd 
+
+El comando ldd (abreviatura de "list dynamic dependencies") es una herramienta utilizada en sistemas operativos tipo Unix, como Linux, para mostrar las bibliotecas dinámicas (también conocidas como bibliotecas compartidas o DLL en Windows) requeridas por un programa ejecutable. Las bibliotecas dinámicas son archivos de código compartido que los programas utilizan para acceder a funciones y rutinas comunes, como las proporcionadas por la libc u otras bibliotecas compartidas.
+
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/850d3602-977b-4f03-957f-a76894bdc10d)
+
+![image](https://github.com/gecr07/Node-HTB/assets/63270579/75c1ec0d-4083-4b24-8ffe-b47bc97109b8)
+
+
+Entonces lo que vamos a hacer es algo como eso de arriba pero con la libreria de libc.
 
 
 
@@ -471,5 +582,12 @@ Y asi vence las validaciones que se hacen antes.
 
 
 
+
+
+
+
+
+
+ 
 
 
